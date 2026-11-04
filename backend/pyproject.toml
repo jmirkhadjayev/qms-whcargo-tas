@@ -1,0 +1,39 @@
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ", "SIM"]
+ignore = ["DJ001", "DJ008"]
+
+[tool.ruff.lint.per-file-ignores]
+"config/settings/*.py" = ["F403", "F405"]
+"**/tests/*.py" = ["E501"]  # long Uzbek strings and chained assertions read better unwrapped
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]
+# --ds beats a DJANGO_SETTINGS_MODULE coming from .env (which points to dev).
+addopts = "-ra --strict-markers --ds=config.settings.test"
+asyncio_mode = "auto"
+markers = ["postgres: needs PostgreSQL (DB triggers); skipped on other databases"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+check_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+# Core modules checked from stage 0; more are added as apps get code.
+files = ["config", "accounts", "audit", "cargo_queue", "integrations", "warehouse", "docks", "notifications", "checkpoint", "exceptions_app"]
+exclude = ["migrations", "tests"]
+
+[[tool.mypy.overrides]]
+module = ["celery.*", "channels.*", "daphne.*"]
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings.test"

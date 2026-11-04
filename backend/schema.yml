@@ -1,0 +1,2699 @@
+openapi: 3.0.3
+info:
+  title: Yuk navbati API
+  version: 0.1.0
+  description: Aeroport yuk ombori uchun elektron navbat tizimi
+paths:
+  /api/auth/csrf/:
+    get:
+      operationId: auth_csrf_retrieve
+      description: Sets the CSRF cookie so the SPA can send X-CSRFToken on the following
+        requests.
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsrfResponse'
+          description: ''
+  /api/auth/login/:
+    post:
+      operationId: auth_login_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+        '400':
+          description: Login yoki parol xato
+  /api/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/auth/me/:
+    get:
+      operationId: auth_me_retrieve
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/checkpoint/{id}/confirm/:
+    post:
+      operationId: checkpoint_confirm_create
+      summary: Chiqishni tasdiqlash
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - checkpoint
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ConfirmRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ConfirmRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckSummary'
+          description: ''
+  /api/checkpoint/{id}/hold/:
+    post:
+      operationId: checkpoint_hold_create
+      summary: 'Tafovut bor: chiqishni to‘xtatish'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - checkpoint
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HoldRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HoldRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HoldRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckSummary'
+          description: ''
+  /api/checkpoint/overview/:
+    get:
+      operationId: checkpoint_overview_retrieve
+      summary: 'NO‘P: kutayotganlar va bugungi o‘tishlar'
+      tags:
+      - checkpoint
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckpointOverview'
+          description: ''
+  /api/checkpoint/scan/:
+    get:
+      operationId: checkpoint_scan_retrieve
+      summary: Talonni skanerlash
+      parameters:
+      - in: query
+        name: code
+        schema:
+          type: string
+        description: Talon QR, AWB yoki navbat raqami
+      tags:
+      - checkpoint
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckSummary'
+          description: ''
+  /api/dispatcher/docks/{code}/maintenance/:
+    post:
+      operationId: dispatcher_docks_maintenance_create
+      summary: Dokni ta’mirga qo‘yish yoki qaytarish
+      parameters:
+      - in: path
+        name: code
+        schema:
+          type: string
+        required: true
+      tags:
+      - dispatcher
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DockStateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DockStateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DockStateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockCard'
+          description: ''
+  /api/dispatcher/overview/:
+    get:
+      operationId: dispatcher_overview_retrieve
+      summary: KPI va dok kartalari
+      tags:
+      - dispatcher
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Overview'
+          description: ''
+  /api/dispatcher/queue/:
+    get:
+      operationId: dispatcher_queue
+      summary: 'Faol navbat: ustuvorlik va kutish tartibida'
+      tags:
+      - dispatcher
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QueueRow'
+          description: ''
+  /api/display/hall/:
+    get:
+      operationId: display_hall_retrieve
+      summary: Zal ekrani (login talab qilinmaydi)
+      parameters:
+      - in: query
+        name: token
+        schema:
+          type: string
+        description: Ekran tokeni (ruxsat etilgan tarmoqdan tashqarida)
+      tags:
+      - display
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hall'
+          description: ''
+  /api/display/led/{code}/:
+    get:
+      operationId: display_led_retrieve
+      summary: Dok LED ekrani (login talab qilinmaydi)
+      parameters:
+      - in: path
+        name: code
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: token
+        schema:
+          type: string
+        description: Ekran tokeni (ruxsat etilgan tarmoqdan tashqarida)
+      tags:
+      - display
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Led'
+          description: ''
+  /api/dock/checkin/:
+    post:
+      operationId: dock_checkin_create
+      summary: Dokda ishga tayyorligini bildirish
+      tags:
+      - dock
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckInRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CheckInRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CheckInRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentScreen'
+          description: ''
+  /api/dock/checkout/:
+    post:
+      operationId: dock_checkout_create
+      summary: Dokdan chiqish
+      tags:
+      - dock
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentScreen'
+          description: ''
+  /api/dock/me/:
+    get:
+      operationId: dock_me_retrieve
+      summary: Dok agenti ekrani
+      tags:
+      - dock
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentScreen'
+          description: ''
+  /api/dock/scan/:
+    get:
+      operationId: dock_scan_retrieve
+      summary: 'Talonni skanerlash: o‘z dokingizdagi arizani topish'
+      parameters:
+      - in: query
+        name: code
+        schema:
+          type: string
+        description: Talon QR, AWB yoki navbat raqami
+      tags:
+      - dock
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanResult'
+          description: ''
+  /api/exceptions/:
+    get:
+      operationId: exceptions_list
+      summary: Istisnolar ro‘yxati
+      parameters:
+      - in: query
+        name: kind
+        schema:
+          type: string
+        description: Istisno turi
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: open (standart), resolved yoki all
+      tags:
+      - exceptions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Exception'
+          description: ''
+  /api/exceptions/{id}/resolve/:
+    post:
+      operationId: exceptions_resolve_create
+      summary: Istisnoni hal qilish (hujjatlashtirilgan qaror)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - exceptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolveRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResolveRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResolveRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exception'
+          description: ''
+  /api/lookups/:
+    get:
+      operationId: lookups_retrieve
+      summary: 'Ma’lumotnomalar: toifa, smena, dok'
+      tags:
+      - lookups
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lookups'
+          description: ''
+  /api/permits/check/:
+    post:
+      operationId: permits_check_create
+      summary: Ruxsatnomani tekshirish
+      tags:
+      - permits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermitCheckRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PermitCheckRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PermitCheckRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermitCheckResult'
+          description: ''
+  /api/permits/manual-verify/:
+    post:
+      operationId: permits_manual_verify_create
+      summary: Ruxsatnomani qo‘lda tasdiqlash
+      tags:
+      - permits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManualVerifyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ManualVerifyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ManualVerifyRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermitCheckResult'
+          description: ''
+  /api/requests/:
+    get:
+      operationId: requests_list
+      summary: Arizalar ro‘yxati
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+        description: Toifa kodi (GEN)
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+        description: Navbat sanasi (YYYY-MM-DD)
+      - in: query
+        name: dock
+        schema:
+          type: string
+        description: Dok kodi (D-01)
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: AWB yoki navbat raqami
+      - in: query
+        name: shift
+        schema:
+          type: integer
+        description: Smena ID
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Holat kodlari, vergul bilan
+      tags:
+      - requests
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedQueueRequest'
+          description: ''
+    post:
+      operationId: requests_create
+      summary: Ariza yaratish va talon berish
+      tags:
+      - requests
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationResponse'
+          description: ''
+  /api/requests/{id}/:
+    get:
+      operationId: requests_retrieve
+      summary: Ariza va uning tarixi
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - requests
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueRequestDetail'
+          description: ''
+  /api/requests/{id}/arrive/:
+    post:
+      operationId: requests_arrive_create
+      summary: Mijoz yetib keldi
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - requests
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueRequestDetail'
+          description: ''
+  /api/requests/{id}/assign-dock/:
+    post:
+      operationId: requests_assign_dock_create
+      summary: Dok belgilash (AWAITING_DOCK -> DOCK_ASSIGNED)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - requests
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignDockRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AssignDockRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssignDockRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueRequestDetail'
+          description: ''
+  /api/requests/{id}/call/:
+    post:
+      operationId: requests_call_create
+      summary: Mijozni chaqirish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - requests
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueRequestDetail'
+          description: ''
+  /api/requests/{id}/priority/:
+    post:
+      operationId: requests_priority_create
+      summary: Ustuvorlikni belgilash
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - requests
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PriorityRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PriorityRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PriorityRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueRequestDetail'
+          description: ''
+  /api/requests/{id}/problems/:
+    post:
+      operationId: requests_problems_create
+      description: Dock agent (own dock) or supervisor reports a problem with a request.
+      summary: Muammoni qayd etish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - requests
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReportRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReportRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exception'
+          description: ''
+  /api/requests/{id}/recall/:
+    post:
+      operationId: requests_recall_create
+      summary: Takroriy chaqiruv
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - requests
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueRequestDetail'
+          description: ''
+  /api/requests/{id}/release/finish/:
+    post:
+      operationId: requests_release_finish_create
+      summary: 'Yakunlash: hamma o‘rinlar berildi'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - requests
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinishRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FinishRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FinishRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueRequestDetail'
+          description: ''
+  /api/requests/{id}/release/partial/:
+    post:
+      operationId: requests_release_partial_create
+      summary: Qisman berish (sabab va izoh majburiy)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - requests
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartialRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PartialRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PartialRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueRequestDetail'
+          description: ''
+  /api/requests/{id}/release/progress/:
+    post:
+      operationId: requests_release_progress_create
+      summary: Berilgan o‘rinlar sonini belgilash
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - requests
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProgressRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProgressRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProgressRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueRequestDetail'
+          description: ''
+  /api/requests/{id}/release/start/:
+    post:
+      operationId: requests_release_start_create
+      summary: Berishni boshlash
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - requests
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueRequestDetail'
+          description: ''
+  /api/requests/{id}/resume/:
+    post:
+      operationId: requests_resume_create
+      summary: To‘xtatilgan arizani oldingi holatiga qaytarish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - requests
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueRequestDetail'
+          description: ''
+  /api/requests/{id}/ticket/:
+    get:
+      operationId: requests_ticket_retrieve
+      summary: Talon ma’lumotlari (chop etish uchun)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - requests
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketData'
+          description: ''
+  /api/requests/{id}/ticket/reprint/:
+    post:
+      operationId: requests_ticket_reprint_create
+      summary: Talonni qayta chop etish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - requests
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketData'
+          description: ''
+  /api/requests/{id}/transition/:
+    post:
+      operationId: requests_transition_create
+      summary: Ariza holatini o‘zgartirish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - requests
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransitionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TransitionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TransitionRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueRequestDetail'
+          description: ''
+  /api/warehouse/tasks/:
+    get:
+      operationId: warehouse_tasks_list
+      summary: Ombor topshiriqlari
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: AWB yoki navbat raqami
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Topshiriq holatlari, vergul bilan
+      tags:
+      - warehouse
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WarehouseTask'
+          description: ''
+  /api/warehouse/tasks/{id}/handover/:
+    post:
+      operationId: warehouse_tasks_handover_create
+      summary: Dokka topshirildi
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - warehouse
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarehouseTask'
+          description: ''
+  /api/warehouse/tasks/{id}/problem/:
+    post:
+      operationId: warehouse_tasks_problem_create
+      summary: Muammoni qayd etish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - warehouse
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProblemRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProblemRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProblemRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarehouseTask'
+          description: ''
+  /api/warehouse/tasks/{id}/ready/:
+    post:
+      operationId: warehouse_tasks_ready_create
+      summary: Yuk tayyor
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - warehouse
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarehouseTask'
+          description: ''
+  /api/warehouse/tasks/{id}/start/:
+    post:
+      operationId: warehouse_tasks_start_create
+      summary: Tayyorlashni boshlash
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - warehouse
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartTaskRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StartTaskRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StartTaskRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarehouseTask'
+          description: ''
+  /api/warehouse/tasks/scan/:
+    get:
+      operationId: warehouse_tasks_scan_retrieve
+      summary: 'Skanerlash: topshiriqni kod bo‘yicha topish'
+      parameters:
+      - in: query
+        name: code
+        schema:
+          type: string
+        description: Talon QR, AWB yoki navbat raqami
+      tags:
+      - warehouse
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarehouseTask'
+          description: ''
+components:
+  schemas:
+    AgentCurrent:
+      type: object
+      properties:
+        id:
+          type: integer
+        queue_number:
+          type: integer
+        awb_number:
+          type: string
+        consignee_name:
+          type: string
+        representative_name:
+          type: string
+        category:
+          type: string
+        special_handling:
+          type: boolean
+        pieces_total:
+          type: integer
+        weight_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        vehicle_plate:
+          type: string
+        notes:
+          type: string
+        status:
+          type: string
+        attempt_no:
+          type: integer
+        recalls_left:
+          type: integer
+        timeout_at:
+          type: string
+          format: date-time
+          nullable: true
+        blockers:
+          type: array
+          items:
+            type: string
+        pieces_released:
+          type: integer
+        pieces_remaining:
+          type: integer
+        operation_pieces:
+          type: integer
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentHistory'
+      required:
+      - attempt_no
+      - awb_number
+      - blockers
+      - category
+      - consignee_name
+      - history
+      - id
+      - notes
+      - operation_pieces
+      - pieces_released
+      - pieces_remaining
+      - pieces_total
+      - queue_number
+      - recalls_left
+      - representative_name
+      - special_handling
+      - status
+      - timeout_at
+      - vehicle_plate
+      - weight_kg
+    AgentDock:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        state:
+          type: string
+        ready_since:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - code
+      - name
+      - ready_since
+      - state
+    AgentHistory:
+      type: object
+      properties:
+        from_status:
+          type: string
+          nullable: true
+        to_status:
+          type: string
+        changed_at:
+          type: string
+          format: date-time
+      required:
+      - changed_at
+      - from_status
+      - to_status
+    AgentNext:
+      type: object
+      properties:
+        queue_number:
+          type: integer
+        category:
+          type: string
+        vehicle_plate:
+          type: string
+        wait_minutes:
+          type: integer
+      required:
+      - category
+      - queue_number
+      - vehicle_plate
+      - wait_minutes
+    AgentScreen:
+      type: object
+      properties:
+        dock:
+          allOf:
+          - $ref: '#/components/schemas/AgentDock'
+          nullable: true
+        current:
+          allOf:
+          - $ref: '#/components/schemas/AgentCurrent'
+          nullable: true
+        next:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentNext'
+        available_docks:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailableDock'
+      required:
+      - available_docks
+      - current
+      - dock
+      - next
+    AssignDockRequest:
+      type: object
+      properties:
+        dock:
+          type: string
+          minLength: 1
+          maxLength: 10
+      required:
+      - dock
+    AvailableDock:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        categories:
+          type: array
+          items:
+            type: string
+      required:
+      - categories
+      - code
+      - name
+    CategoryLookup:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        special_handling:
+          type: boolean
+          readOnly: true
+        default_priority:
+          type: integer
+          readOnly: true
+      required:
+      - code
+      - default_priority
+      - id
+      - name
+      - special_handling
+    CheckInRequest:
+      type: object
+      properties:
+        dock:
+          type: string
+          minLength: 1
+          maxLength: 10
+      required:
+      - dock
+    CheckSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        queue_number:
+          type: integer
+        awb_number:
+          type: string
+        consignee_name:
+          type: string
+        category:
+          type: string
+        special_handling:
+          type: boolean
+        vehicle_plate:
+          type: string
+        pieces_total:
+          type: integer
+        pieces_released:
+          type: integer
+        pieces_remaining:
+          type: integer
+        weight_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        status:
+          type: string
+        dock:
+          type: string
+          nullable: true
+        can_confirm:
+          type: boolean
+        blocked_reason:
+          type: string
+        open_problems:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpenProblem'
+      required:
+      - awb_number
+      - blocked_reason
+      - can_confirm
+      - category
+      - consignee_name
+      - dock
+      - id
+      - open_problems
+      - pieces_released
+      - pieces_remaining
+      - pieces_total
+      - queue_number
+      - special_handling
+      - status
+      - vehicle_plate
+      - weight_kg
+    CheckpointOverview:
+      type: object
+      properties:
+        waiting:
+          type: array
+          items:
+            $ref: '#/components/schemas/Waiting'
+        recent:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecentPass'
+      required:
+      - recent
+      - waiting
+    ConfirmRequest:
+      type: object
+      properties:
+        plate_observed:
+          type: string
+          maxLength: 20
+    CsrfResponse:
+      type: object
+      properties:
+        csrf_token:
+          type: string
+      required:
+      - csrf_token
+    DockCard:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        name:
+          type: string
+        state:
+          $ref: '#/components/schemas/StateEnum'
+        is_active:
+          type: boolean
+        categories:
+          type: array
+          items:
+            type: string
+        agent:
+          type: string
+          nullable: true
+        agent_ready:
+          type: boolean
+        request:
+          allOf:
+          - $ref: '#/components/schemas/DockRequest'
+          nullable: true
+      required:
+      - agent
+      - agent_ready
+      - categories
+      - code
+      - id
+      - is_active
+      - name
+      - request
+      - state
+    DockLookup:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        state:
+          allOf:
+          - $ref: '#/components/schemas/StateEnum'
+          readOnly: true
+        is_active:
+          type: boolean
+          readOnly: true
+      required:
+      - code
+      - id
+      - is_active
+      - name
+      - state
+    DockRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+        queue_number:
+          type: integer
+        status:
+          type: string
+        vehicle_plate:
+          type: string
+        category:
+          type: string
+      required:
+      - category
+      - id
+      - queue_number
+      - status
+      - vehicle_plate
+    DockStateRequest:
+      type: object
+      properties:
+        maintenance:
+          type: boolean
+      required:
+      - maintenance
+    Exception:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        request:
+          type: integer
+          readOnly: true
+        queue_number:
+          type: integer
+          readOnly: true
+        request_status:
+          type: string
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/ExceptionKindEnum'
+          readOnly: true
+        pieces_affected:
+          type: integer
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        reported_by:
+          type: string
+          readOnly: true
+          nullable: true
+        reported_at:
+          type: string
+          format: date-time
+          readOnly: true
+        resolved_by:
+          type: string
+          readOnly: true
+          nullable: true
+        resolved_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        resolution:
+          type: string
+          readOnly: true
+      required:
+      - description
+      - id
+      - kind
+      - pieces_affected
+      - queue_number
+      - reported_at
+      - reported_by
+      - request
+      - request_status
+      - resolution
+      - resolved_at
+      - resolved_by
+    ExceptionKindEnum:
+      enum:
+      - MISSING
+      - DAMAGE
+      - SHORTAGE
+      - MISMATCH
+      - PARTIAL
+      - NO_SHOW
+      - CHECKPOINT
+      type: string
+      description: |-
+        * `MISSING` - Missing
+        * `DAMAGE` - Damage
+        * `SHORTAGE` - Shortage
+        * `MISMATCH` - Mismatch
+        * `PARTIAL` - Partial
+        * `NO_SHOW` - No Show
+        * `CHECKPOINT` - Checkpoint
+    FinishRequest:
+      type: object
+      properties:
+        weight_released_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+    Hall:
+      type: object
+      properties:
+        called:
+          type: array
+          items:
+            $ref: '#/components/schemas/HallCalled'
+        preparing:
+          type: array
+          items:
+            $ref: '#/components/schemas/HallPreparing'
+      required:
+      - called
+      - preparing
+    HallCalled:
+      type: object
+      properties:
+        queue_number:
+          type: integer
+        dock:
+          type: string
+        vehicle_plate:
+          type: string
+        recall:
+          type: boolean
+      required:
+      - dock
+      - queue_number
+      - recall
+      - vehicle_plate
+    HallPreparing:
+      type: object
+      properties:
+        queue_number:
+          type: integer
+      required:
+      - queue_number
+    History:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        from_status:
+          type: string
+          readOnly: true
+          nullable: true
+        to_status:
+          type: string
+          readOnly: true
+        changed_by:
+          type: string
+          readOnly: true
+        reason:
+          type: string
+          readOnly: true
+        changed_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - changed_at
+      - changed_by
+      - from_status
+      - id
+      - reason
+      - to_status
+    HoldRequest:
+      type: object
+      properties:
+        description:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        plate_observed:
+          type: string
+          maxLength: 20
+      required:
+      - description
+    Kind914Enum:
+      enum:
+      - MISSING
+      - DAMAGE
+      - SHORTAGE
+      - MISMATCH
+      type: string
+      description: |-
+        * `MISSING` - MISSING
+        * `DAMAGE` - DAMAGE
+        * `SHORTAGE` - SHORTAGE
+        * `MISMATCH` - MISMATCH
+    Kpi:
+      type: object
+      properties:
+        registered_today:
+          type: integer
+        in_preparation:
+          type: integer
+        waiting_dock:
+          type: integer
+        at_dock:
+          type: integer
+        completed_today:
+          type: integer
+        open_exceptions:
+          type: integer
+        avg_wait_minutes:
+          type: integer
+          nullable: true
+      required:
+      - at_dock
+      - avg_wait_minutes
+      - completed_today
+      - in_preparation
+      - open_exceptions
+      - registered_today
+      - waiting_dock
+    Led:
+      type: object
+      properties:
+        dock:
+          type: string
+        state:
+          type: string
+        current:
+          allOf:
+          - $ref: '#/components/schemas/LedCurrent'
+          nullable: true
+      required:
+      - current
+      - dock
+      - state
+    LedCurrent:
+      type: object
+      properties:
+        queue_number:
+          type: integer
+        vehicle_plate:
+          type: string
+        phase:
+          $ref: '#/components/schemas/PhaseEnum'
+        recall:
+          type: boolean
+      required:
+      - phase
+      - queue_number
+      - recall
+      - vehicle_plate
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - username
+    Lookups:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryLookup'
+        shifts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShiftLookup'
+        docks:
+          type: array
+          items:
+            $ref: '#/components/schemas/DockLookup'
+      required:
+      - categories
+      - docks
+      - shifts
+    ManualVerifyRequest:
+      type: object
+      properties:
+        awb_number:
+          type: string
+          minLength: 1
+          maxLength: 20
+        permit_number:
+          type: string
+          minLength: 1
+          maxLength: 100
+        valid_until:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - awb_number
+      - permit_number
+    OpenProblem:
+      type: object
+      properties:
+        kind:
+          type: string
+        description:
+          type: string
+      required:
+      - description
+      - kind
+    Overview:
+      type: object
+      properties:
+        kpi:
+          $ref: '#/components/schemas/Kpi'
+        docks:
+          type: array
+          items:
+            $ref: '#/components/schemas/DockCard'
+      required:
+      - docks
+      - kpi
+    PaginatedQueueRequest:
+      type: object
+      description: Shape of the paginated list response (documentation only).
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+        previous:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/QueueRequest'
+      required:
+      - count
+      - next
+      - previous
+      - results
+    PartialRequest:
+      type: object
+      properties:
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
+        comment:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required:
+      - comment
+      - reason
+    PermitCheckRequest:
+      type: object
+      properties:
+        awb_number:
+          type: string
+          minLength: 1
+          maxLength: 20
+      required:
+      - awb_number
+    PermitCheckResult:
+      type: object
+      properties:
+        verified:
+          type: boolean
+        awb_number:
+          type: string
+          nullable: true
+        reason:
+          type: string
+        permit:
+          allOf:
+          - $ref: '#/components/schemas/PermitInfo'
+          nullable: true
+      required:
+      - awb_number
+      - permit
+      - reason
+      - verified
+    PermitInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+        permit_number:
+          type: string
+        source:
+          type: string
+        valid_until:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - id
+      - permit_number
+      - source
+      - valid_until
+    PhaseEnum:
+      enum:
+      - CALLING
+      - SERVING
+      type: string
+      description: |-
+        * `CALLING` - CALLING
+        * `SERVING` - SERVING
+    PriorityRequest:
+      type: object
+      properties:
+        priority:
+          type: integer
+          maximum: 9
+          minimum: 0
+        reason:
+          type: string
+          maxLength: 500
+      required:
+      - priority
+    ProblemRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/Kind914Enum'
+        description:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        pieces_affected:
+          type: integer
+          minimum: 0
+          default: 0
+      required:
+      - description
+      - kind
+    ProgressRequest:
+      type: object
+      properties:
+        pieces_released:
+          type: integer
+          minimum: 0
+      required:
+      - pieces_released
+    QueueRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        queue_date:
+          type: string
+          format: date
+          readOnly: true
+        queue_number:
+          type: integer
+          readOnly: true
+        awb_number:
+          type: string
+          readOnly: true
+        consignee_name:
+          type: string
+          readOnly: true
+        representative_name:
+          type: string
+          readOnly: true
+        category:
+          type: string
+          readOnly: true
+        shift:
+          type: string
+          readOnly: true
+        dock:
+          type: string
+          readOnly: true
+          nullable: true
+        pieces_total:
+          type: integer
+          readOnly: true
+        weight_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        vehicle_plate:
+          type: string
+          readOnly: true
+        sms_phone:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/RequestStatusEnum'
+          readOnly: true
+        priority:
+          type: integer
+          readOnly: true
+        notes:
+          type: string
+          readOnly: true
+        registered_at:
+          type: string
+          format: date-time
+          readOnly: true
+        closed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - awb_number
+      - category
+      - closed_at
+      - consignee_name
+      - dock
+      - id
+      - notes
+      - pieces_total
+      - priority
+      - queue_date
+      - queue_number
+      - registered_at
+      - representative_name
+      - shift
+      - sms_phone
+      - status
+      - vehicle_plate
+      - weight_kg
+    QueueRequestDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        queue_date:
+          type: string
+          format: date
+          readOnly: true
+        queue_number:
+          type: integer
+          readOnly: true
+        awb_number:
+          type: string
+          readOnly: true
+        consignee_name:
+          type: string
+          readOnly: true
+        representative_name:
+          type: string
+          readOnly: true
+        category:
+          type: string
+          readOnly: true
+        shift:
+          type: string
+          readOnly: true
+        dock:
+          type: string
+          readOnly: true
+          nullable: true
+        pieces_total:
+          type: integer
+          readOnly: true
+        weight_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        vehicle_plate:
+          type: string
+          readOnly: true
+        sms_phone:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/RequestStatusEnum'
+          readOnly: true
+        priority:
+          type: integer
+          readOnly: true
+        notes:
+          type: string
+          readOnly: true
+        registered_at:
+          type: string
+          format: date-time
+          readOnly: true
+        closed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        permit:
+          allOf:
+          - $ref: '#/components/schemas/PermitInfo'
+          readOnly: true
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/History'
+          readOnly: true
+      required:
+      - awb_number
+      - category
+      - closed_at
+      - consignee_name
+      - dock
+      - history
+      - id
+      - notes
+      - permit
+      - pieces_total
+      - priority
+      - queue_date
+      - queue_number
+      - registered_at
+      - representative_name
+      - shift
+      - sms_phone
+      - status
+      - vehicle_plate
+      - weight_kg
+    QueueRow:
+      type: object
+      properties:
+        id:
+          type: integer
+        queue_number:
+          type: integer
+        awb_number:
+          type: string
+        consignee_name:
+          type: string
+        category:
+          type: string
+        special_handling:
+          type: boolean
+        status:
+          type: string
+        priority:
+          type: integer
+        dock:
+          type: string
+          nullable: true
+        pieces_total:
+          type: integer
+        vehicle_plate:
+          type: string
+        wait_minutes:
+          type: integer
+        task_status:
+          type: string
+          nullable: true
+        free_docks:
+          type: array
+          items:
+            type: string
+        attempts:
+          type: integer
+        recalls_left:
+          type: integer
+        call_blockers:
+          type: array
+          items:
+            type: string
+        remaining_pieces:
+          type: integer
+        suspended_from:
+          type: string
+          nullable: true
+      required:
+      - attempts
+      - awb_number
+      - call_blockers
+      - category
+      - consignee_name
+      - dock
+      - free_docks
+      - id
+      - pieces_total
+      - priority
+      - queue_number
+      - recalls_left
+      - remaining_pieces
+      - special_handling
+      - status
+      - suspended_from
+      - task_status
+      - vehicle_plate
+      - wait_minutes
+    ReasonEnum:
+      enum:
+      - MISSING
+      - DAMAGE
+      - SHORTAGE
+      - CUSTOMER
+      - OTHER
+      type: string
+      description: |-
+        * `MISSING` - MISSING
+        * `DAMAGE` - DAMAGE
+        * `SHORTAGE` - SHORTAGE
+        * `CUSTOMER` - CUSTOMER
+        * `OTHER` - OTHER
+    ReasonRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required:
+      - reason
+    RecentPass:
+      type: object
+      properties:
+        queue_number:
+          type: integer
+        result:
+          $ref: '#/components/schemas/ResultEnum'
+        scanned_at:
+          type: string
+          format: date-time
+        officer:
+          type: string
+      required:
+      - officer
+      - queue_number
+      - result
+      - scanned_at
+    RegisterRequestRequest:
+      type: object
+      properties:
+        awb_number:
+          type: string
+          minLength: 1
+          maxLength: 20
+        consignee_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        consignee_tin:
+          type: string
+          maxLength: 20
+        representative_name:
+          type: string
+          maxLength: 255
+        sms_phone:
+          type: string
+          minLength: 1
+          maxLength: 20
+        pieces_total:
+          type: integer
+          maximum: 1000000
+          minimum: 1
+        weight_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        vehicle_plate:
+          type: string
+          maxLength: 20
+        category:
+          type: string
+          minLength: 1
+          maxLength: 10
+        notes:
+          type: string
+      required:
+      - awb_number
+      - category
+      - consignee_name
+      - pieces_total
+      - sms_phone
+      - weight_kg
+    RegistrationResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        queue_date:
+          type: string
+          format: date
+          readOnly: true
+        queue_number:
+          type: integer
+          readOnly: true
+        awb_number:
+          type: string
+          readOnly: true
+        consignee_name:
+          type: string
+          readOnly: true
+        representative_name:
+          type: string
+          readOnly: true
+        category:
+          type: string
+          readOnly: true
+        shift:
+          type: string
+          readOnly: true
+        dock:
+          type: string
+          readOnly: true
+          nullable: true
+        pieces_total:
+          type: integer
+          readOnly: true
+        weight_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        vehicle_plate:
+          type: string
+          readOnly: true
+        sms_phone:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/RequestStatusEnum'
+          readOnly: true
+        priority:
+          type: integer
+          readOnly: true
+        notes:
+          type: string
+          readOnly: true
+        registered_at:
+          type: string
+          format: date-time
+          readOnly: true
+        closed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        permit:
+          allOf:
+          - $ref: '#/components/schemas/PermitInfo'
+          readOnly: true
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/History'
+          readOnly: true
+        ticket:
+          allOf:
+          - $ref: '#/components/schemas/TicketData'
+          readOnly: true
+      required:
+      - awb_number
+      - category
+      - closed_at
+      - consignee_name
+      - dock
+      - history
+      - id
+      - notes
+      - permit
+      - pieces_total
+      - priority
+      - queue_date
+      - queue_number
+      - registered_at
+      - representative_name
+      - shift
+      - sms_phone
+      - status
+      - ticket
+      - vehicle_plate
+      - weight_kg
+    ReportRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/Kind914Enum'
+        description:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        pieces_affected:
+          type: integer
+          minimum: 0
+          default: 0
+      required:
+      - description
+      - kind
+    RequestStatusEnum:
+      enum:
+      - REGISTERED
+      - AWAITING_PREP
+      - PREP_STARTED
+      - CARGO_READY
+      - AWAITING_DOCK
+      - DOCK_ASSIGNED
+      - CALLED
+      - ARRIVED
+      - RELEASE_STARTED
+      - RELEASED
+      - PARTIALLY_RELEASED
+      - AWAITING_CHECKPOINT
+      - EXIT_CONFIRMED
+      - SUSPENDED
+      - CANCELLED
+      - CLOSED
+      type: string
+      description: |-
+        * `REGISTERED` - Ro‘yxatdan o‘tkazildi
+        * `AWAITING_PREP` - Tayyorlashni kutmoqda
+        * `PREP_STARTED` - Tayyorlash boshlandi
+        * `CARGO_READY` - Yuk tayyorlandi
+        * `AWAITING_DOCK` - Dok belgilanishini kutmoqda
+        * `DOCK_ASSIGNED` - Dok belgilandi
+        * `CALLED` - Mijoz chaqirildi
+        * `ARRIVED` - Mijoz yetib keldi
+        * `RELEASE_STARTED` - Yuk berish boshlandi
+        * `RELEASED` - Yuk berish yakunlandi
+        * `PARTIALLY_RELEASED` - Qisman berildi
+        * `AWAITING_CHECKPOINT` - NO‘Pda tasdiqlashni kutmoqda
+        * `EXIT_CONFIRMED` - Chiqib ketish tasdiqlandi
+        * `SUSPENDED` - To‘xtatib turildi
+        * `CANCELLED` - Bekor qilindi
+        * `CLOSED` - Yopildi
+    ResolveRequest:
+      type: object
+      properties:
+        resolution:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required:
+      - resolution
+    ResultEnum:
+      enum:
+      - APPROVED
+      - HELD
+      type: string
+      description: |-
+        * `APPROVED` - APPROVED
+        * `HELD` - HELD
+    ScanResult:
+      type: object
+      properties:
+        id:
+          type: integer
+        queue_number:
+          type: integer
+        status:
+          type: string
+      required:
+      - id
+      - queue_number
+      - status
+    ShiftLookup:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        starts_at:
+          type: string
+          format: time
+          readOnly: true
+        ends_at:
+          type: string
+          format: time
+          readOnly: true
+      required:
+      - ends_at
+      - id
+      - name
+      - starts_at
+    StartTaskRequest:
+      type: object
+      properties:
+        storage_location:
+          type: string
+          maxLength: 100
+    StateEnum:
+      enum:
+      - FREE
+      - BUSY
+      - MAINTENANCE
+      type: string
+      description: |-
+        * `FREE` - Free
+        * `BUSY` - Busy
+        * `MAINTENANCE` - Maintenance
+    TaskRequest:
+      type: object
+      description: The request data a warehouse worker needs (TZ 3.3 task contents).
+      properties:
+        id:
+          type: integer
+        queue_number:
+          type: integer
+        awb_number:
+          type: string
+        pieces_total:
+          type: integer
+        weight_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        category:
+          type: string
+        category_name:
+          type: string
+        special_handling:
+          type: boolean
+        dock:
+          type: string
+          nullable: true
+        status:
+          type: string
+        priority:
+          type: integer
+        notes:
+          type: string
+        pieces_remaining:
+          type: integer
+          readOnly: true
+      required:
+      - awb_number
+      - category
+      - category_name
+      - id
+      - notes
+      - pieces_remaining
+      - pieces_total
+      - priority
+      - queue_number
+      - special_handling
+      - status
+      - weight_kg
+    TicketData:
+      type: object
+      description: Everything the 80 mm ticket shows (TZ 3.1 "Talonga qo‘yiladigan
+        talablar").
+      properties:
+        airport:
+          type: string
+        queue_number:
+          type: integer
+        queue_date:
+          type: string
+          format: date
+        awb_number:
+          type: string
+        pieces_total:
+          type: integer
+        weight_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        vehicle_plate:
+          type: string
+        registered_at:
+          type: string
+          format: date-time
+        qr_token:
+          type: string
+        printed_at:
+          type: string
+          format: date-time
+        is_reprint:
+          type: boolean
+      required:
+      - airport
+      - awb_number
+      - is_reprint
+      - pieces_total
+      - printed_at
+      - qr_token
+      - queue_date
+      - queue_number
+      - registered_at
+      - vehicle_plate
+      - weight_kg
+    TransitionRequest:
+      type: object
+      properties:
+        to_status:
+          $ref: '#/components/schemas/RequestStatusEnum'
+        reason:
+          type: string
+      required:
+      - to_status
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        role:
+          type: string
+          readOnly: true
+      required:
+      - full_name
+      - id
+      - role
+      - username
+    Waiting:
+      type: object
+      properties:
+        id:
+          type: integer
+        queue_number:
+          type: integer
+        vehicle_plate:
+          type: string
+        pieces_released:
+          type: integer
+        pieces_total:
+          type: integer
+        is_partial:
+          type: boolean
+      required:
+      - id
+      - is_partial
+      - pieces_released
+      - pieces_total
+      - queue_number
+      - vehicle_plate
+    WarehouseTask:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/WarehouseTaskStatusEnum'
+          readOnly: true
+        storage_location:
+          type: string
+          readOnly: true
+        assigned_to:
+          type: string
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        ready_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        handed_over_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        request:
+          allOf:
+          - $ref: '#/components/schemas/TaskRequest'
+          readOnly: true
+      required:
+      - assigned_to
+      - created_at
+      - handed_over_at
+      - id
+      - ready_at
+      - request
+      - started_at
+      - status
+      - storage_location
+    WarehouseTaskStatusEnum:
+      enum:
+      - NEW
+      - IN_PROGRESS
+      - READY
+      - HANDED_OVER
+      - PROBLEM
+      type: string
+      description: |-
+        * `NEW` - New
+        * `IN_PROGRESS` - In Progress
+        * `READY` - Ready
+        * `HANDED_OVER` - Handed Over
+        * `PROBLEM` - Problem
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
